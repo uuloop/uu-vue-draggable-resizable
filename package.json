@@ -8,10 +8,10 @@
   "scripts": {
     "dev": "node build/dev-server.js",
     "docs": "webpack --config build/webpack.docs.js",
-    "build": "rm -rf dist && webpack --config build/webpack.dist.js",
+    "build": "webpack --config build/webpack.dist.js",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "test": "npm run unit",
-    "prepublish": "npm run test; npm run build",
+    "prepublish": "npm run build",
     "lint": "eslint --ext .js,.vue src test/unit/specs"
   },
   "repository": {
