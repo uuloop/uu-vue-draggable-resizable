@@ -9,7 +9,7 @@
       dragging: dragging,
       resizing: resizing
     }"
-    @mousedown.stop="elmDown"
+    @mousedown.stop.prevent="elmDown"
     @touchstart.prevent.stop="elmDown"
     @dblclick="fillParent"
   >
@@ -155,9 +155,7 @@ export default {
     this.elmH = 0
   },
   mounted: function () {
-    document.documentElement.addEventListener('mousemove', this.handleMove, true)
     document.documentElement.addEventListener('mousedown', this.deselect, true)
-    document.documentElement.addEventListener('mouseup', this.handleUp, true)
 
     // touch events bindings
     document.documentElement.addEventListener('touchmove', this.handleMove, true)
@@ -177,9 +175,9 @@ export default {
     document.documentElement.removeEventListener('mouseup', this.handleUp, true)
 
     // touch events bindings removed
-    document.documentElement.addEventListener('touchmove', this.handleMove, true)
-    document.documentElement.addEventListener('touchend touchcancel', this.deselect, true)
-    document.documentElement.addEventListener('touchstart', this.handleUp, true)
+    document.documentElement.removeEventListener('touchmove', this.handleMove, true)
+    document.documentElement.removeEventListener('touchend touchcancel', this.deselect, true)
+    document.documentElement.removeEventListener('touchstart', this.handleUp, true)
   },
 
   data: function () {
@@ -217,7 +215,6 @@ export default {
 
         if ((this.y + this.h) > this.parentH) this.height = parentH - this.y
       }
-
       this.elmW = this.width
       this.elmH = this.height
 
@@ -253,6 +250,14 @@ export default {
       }
     },
     deselect: function (e) {
+      document.documentElement.addEventListener('mousemove', this.handleMove, true)
+      document.documentElement.addEventListener('mouseup', this.handleUp, true)
+
+      this.elmX = parseInt(this.$el.style.left)
+      this.elmY = parseInt(this.$el.style.top)
+      this.elmW = this.$el.offsetWidth || this.$el.clientWidth
+      this.elmH = this.$el.offsetHeight || this.$el.clientHeight
+
       if (e.type.indexOf('touch') !== -1) {
         this.mouseX = e.changedTouches[0].clientX
         this.mouseY = e.changedTouches[0].clientY
@@ -265,6 +270,7 @@ export default {
       this.lastMouseY = this.mouseY
 
       const target = e.target || e.srcElement
+
       const regex = new RegExp('handle-([trmbl]{2})', '')
 
       if (!this.$el.contains(target) && !regex.test(target.className)) {
@@ -430,6 +436,8 @@ export default {
       }
     },
     handleUp: function (e) {
+      document.documentElement.removeEventListener('mousemove', this.handleMove, true)
+      document.documentElement.removeEventListener('mouseup', this.handleUp, true)
       if (e.type.indexOf('touch') !== -1) {
         this.lastMouseX = e.changedTouches[0].clientX
         this.lastMouseY = e.changedTouches[0].clientY
@@ -470,6 +478,18 @@ export default {
   },
 
   watch: {
+    x: function (val) {
+      this.left = val;
+    },
+    y: function (val) {
+      this.top = val;
+    },
+    w: function (val) {
+      this.width = val;
+    },
+    h: function (val) {
+      this.height = val;
+    },
     active: function (val) {
       this.enabled = val
     },
